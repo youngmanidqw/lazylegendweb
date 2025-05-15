@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lazy legend web</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  body {
+    margin: 0; font-family: 'Inter', sans-serif;
+    display: flex; justify-content: center; align-items: center;
+    height: 100vh; background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+  form {
+    background: rgba(0, 0, 0, 0.25);
+    padding: 2rem 2.5rem; border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    width: 320px;
+  }
+  h2 {
+    margin-top: 0; margin-bottom: 1.5rem; text-align: center;
+  }
+  label {
+    display: block; margin-bottom: 0.3rem; font-weight: 600;
+  }
+  input[type=text], input[type=password] {
+    width: 100%; padding: 0.75rem 1rem;
+    border: none; border-radius: 6px;
+    background: rgba(255,255,255,0.15);
+    color: white; font-size: 1rem;
+    margin-bottom: 1rem; outline: none;
+  }
+  input::placeholder {
+    color: #ddd;
+  }
+  input:focus {
+    background: rgba(255,255,255,0.3);
+  }
+  button {
+    width: 100%; padding: 0.75rem;
+    font-weight: 700; font-size: 1.1rem;
+    border: none; border-radius: 25px;
+    cursor: pointer; background: #a3d8f4; color: #333;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #89c8ea;
+  }
+  #error-msg {
+    color: #ff6b6b;
+    font-weight: 600; margin-top: 0.75rem;
+    text-align: center; display: none;
+  }
+</style>
+</head>
+<body>
+<form id="login-form" aria-label="Login form">
+  <h2>Login</h2>
+  <label for="username">Username</label>
+  <input id="username" type="text" placeholder="Username" autocomplete="username" required />
+  <label for="password">Password</label>
+  <input id="password" type="password" placeholder="Password" autocomplete="current-password" required />
+  <button type="submit">Log In</button>
+  <div id="error-msg" role="alert"></div>
+</form>
+<script>
+  const validUsername = 'user';
+  const validPassword = 'nndgame';
+  const form = document.getElementById('login-form');
+  const errorMsg = document.getElementById('error-msg');
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    errorMsg.style.display = 'none';
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    if (username === validUsername && password === validPassword) {
+      sessionStorage.setItem('loggedInUser', username);
+      window.location.href = 'chat.html';
+    } else {
+      errorMsg.textContent = 'Invalid username or password.';
+      errorMsg.style.display = 'block';
+    }
+  });
+</script>
+</body>
+</html>

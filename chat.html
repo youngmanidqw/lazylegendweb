@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>lazy legend group chat</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    padding: 1.5rem 2rem;
+    background: rgba(0,0,0,0.2);
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  main {
+    flex: 1;
+    display: flex;
+    padding: 1rem 2rem;
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: auto;
+    width: 100%;
+  }
+  section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.3);
+    padding: 1rem;
+    max-height: calc(100vh - 140px);
+  }
+  #upload-section {
+    max-width: 320px;
+  }
+  #dropzone {
+    border: 2px dashed #dcdcdc;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    color: #ccc;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+  #dropzone.dragover {
+    border-color: #a3d8f4;
+    background: rgba(163, 216, 244, 0.1);
+    color: #a3d8f4;
+  }
+  #dropzone input[type=file] {
+    display: none;
+  }
+  #selected-file-info {
+    margin-top: 0.75rem;
+    color: #b7c9e2;
+    font-size: 0.9rem;
+    word-break: break-word;
+  }
+  #send-file-btn {
+    margin-top: 1rem;
+    padding: 0.6rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    background: #a3d8f4;
+    color: #333;
+    transition: background 0.3s ease;
+    user-select: none;
+    width: 100%;
+  }
+  #send-file-btn:hover:not(:disabled) {
+    background: #89c8ea;
+  }
+  #send-file-btn:disabled {
+    background: #7aa8b8;
+    cursor: not-allowed;
+  }
+  #chat-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  #chat-messages {
+    flex: 1;
+    background: rgba(0,0,0,0.15);
+    border-radius: 12px;
+    padding: 1rem;
+    overflow-y: auto;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+  }
+  .message {
+    max-width: 80%;
+    margin-bottom: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    word-break: break-word;
+  }
+  .message.user {
+    align-self: flex-end;
+    background: #764ba2;
+    border-radius: 12px 12px 0 12px;
+    padding: 0.6rem 1rem;
+  }
+  .message.system {
+    align-self: flex-start;
+    background: #445278;
+    border-radius: 12px 12px 12px 0;
+    padding: 0.6rem 1rem;
+  }
+  .message .meta {
+    opacity: 0.6;
+    font-size: 0.75rem;
+    margin-bottom: 0.2rem;
+  }
+  #chat-input-container {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+  #chat-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 25px;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.25);
+    transition: background 0.3s ease;
+  }
+  #chat-input::placeholder {
+    color: #ddd;
+  }
+  #chat-input:focus {
+    background: rgba(255,255,255,0.35);
+  }
+  #send-chat-btn {
+    padding: 0 1.5rem;
+    border: none;
+    background: #a3d8f4;
+    color: #333;
+    cursor: pointer;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    user-select: none;
+    transition: background 0.3s ease;
+  }
+  #send-chat-btn:disabled {
+    background: #7aa8b8;
+    cursor: not-allowed;
+  }
+  #send-chat-btn:hover:not(:disabled) {
+    background: #89c8ea;
+  }
+  footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.85rem;
+    color: #ddd;
+    background: rgba(0,0,0,0.15);
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<header>lazy legend web</header>
+<main>
+  <section id="upload-section" aria-label="Upload file section">
+    <label id="dropzone" for="file-input" tabindex="0">
+      <input type="file" id="file-input" />
+      Drag or click to select file to send
+    </label>
+    <div id="selected-file-info" aria-live="polite"></div>
+    <button id="send-file-btn" disabled>Send File</button>
+  </section>
+  <section id="chat-section" aria-label="Chat section">
+    <div id="chat-messages" aria-live="polite" aria-relevant="additions"></div>
+    <div id="chat-input-container">
+      <input type="text" id="chat-input" placeholder="Type your message..." aria-label="Chat input" />
+      <button id="send-chat-btn" disabled>Send</button>
+    </div>
+  </section>
+</main>
+<footer>lazy game build</footer>
+<script>
+  (() => {
+    // Check login session
+    const loggedInUser = sessionStorage.getItem('loggedInUser');
+    if (!loggedInUser) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const selectedFileInfo = document.getElementById('selected-file-info');
+    const sendFileBtn = document.getElementById('send-file-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendChatBtn = document.getElementById('send-chat-btn');
+
+    function formatFileSize(bytes) {
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      if(bytes === 0) return '0 Bytes';
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return (bytes / Math.pow(1024,i)).toFixed(2) + ' ' + sizes[i];
+    }
+
+    function updateSelectedFileInfo() {
+      if(fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        selectedFileInfo.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+        sendFileBtn.disabled = false;
+      } else {
+        selectedFileInfo.textContent = '';
+        sendFileBtn.disabled = true;
+      }
+    }
+
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if(e.dataTransfer.files.length){
+        fileInput.files = e.dataTransfer.files;
+        updateSelectedFileInfo();
+      }
+    });
+
+    fileInput.addEventListener('change', updateSelectedFileInfo);
+
+    sendFileBtn.addEventListener('click', () => {
+      if(fileInput.files.length === 0) return;
+      const file = fileInput.files[0];
+
+      // Show upload message
+      addChatMessage(`Uploaded file: ${file.name}`, 'user');
+      if(file.type.startsWith('image/')){
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.alt = file.name;
+          img.style.marginTop = '0.5rem';
+          img.style.maxWidth = '150px';
+          chatMessages.lastChild.appendChild(img);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+        reader.readAsDataURL(file);
+      }
+      // Clear selection
+      fileInput.value = '';
+      updateSelectedFileInfo();
+    });
+
+    function addChatMessage(text, type='user'){
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', type);
+      const now = new Date();
+      const timestamp = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'meta';
+      metaDiv.textContent = (type === 'user' ? loggedInUser : 'System') + ' • ' + timestamp;
+      const contentDiv = document.createElement('div');
+      contentDiv.textContent = text;
+      msgDiv.appendChild(metaDiv);
+      msgDiv.appendChild(contentDiv);
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    chatInput.addEventListener('input', () => {
+      sendChatBtn.disabled = chatInput.value.trim() === '';
+    });
+
+    sendChatBtn.addEventListener('click', () => {
+      const text = chatInput.value.trim();
+      if(!text) return;
+      addChatMessage(text, 'user');
+      chatInput.value = '';
+      sendChatBtn.disabled = true;
+      // Simulate system reply
+      setTimeout(() => {
+        addChatMessage('Message received: ' + text, 'system');
+      }, 800);
+    });
+
+    chatInput.addEventListener('keypress', e => {
+      if(e.key === 'Enter' && !sendChatBtn.disabled){
+        e.preventDefault();
+        sendChatBtn.click();
+      }
+    });
+  })();
+</script>
+</body>
+</html>
